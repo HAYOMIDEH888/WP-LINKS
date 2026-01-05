@@ -1,0 +1,7 @@
+{
+  "name": "WILLY PAULLY LINKS",
+  "description": "A sophisticated AI-powered marketplace platform featuring real-time negotiation chats, intelligent product listing generation, and an automated sales consultant.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
