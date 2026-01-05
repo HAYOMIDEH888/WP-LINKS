@@ -7,6 +7,7 @@ import SellForm from './components/SellForm';
 import Dashboard from './components/Dashboard';
 import Assistant from './components/Assistant';
 import Auth from './components/Auth';
+import DeployGuide from './components/DeployGuide';
 
 const INITIAL_PRODUCTS: Product[] = [
   {
@@ -33,17 +34,6 @@ const INITIAL_PRODUCTS: Product[] = [
     isCryptoListing: true,
     cryptoAmount: 0.05,
     cryptoSymbol: 'BTC'
-  },
-  {
-    id: '2',
-    name: 'Artisan Ceramic Vase',
-    price: 45,
-    category: 'Home Decor',
-    description: 'Hand-thrown stoneware vase with a unique cobalt glaze.',
-    image: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&q=80&w=400',
-    seller: 'Elena Potter',
-    rating: 4.9,
-    isSellerVerified: true
   }
 ];
 
@@ -70,25 +60,12 @@ const App: React.FC = () => {
     return <Auth onComplete={setUser} />;
   }
 
-  const addProduct = (newProduct: Product) => {
-    setProducts([newProduct, ...products]);
-    setActiveTab(AppTab.MARKETPLACE);
-  };
-
   const handlePurchase = (product: Product, tx: Transaction) => {
     if (tx.amount > user.transactionLimit) {
       alert(`Transaction exceeds your Tier ${user.verificationTier} limit of $${user.transactionLimit}. Please upgrade your verification in the Dashboard.`);
       return;
     }
     setTransactions([tx, ...transactions]);
-    if (product.isCryptoListing && product.cryptoSymbol && product.cryptoAmount) {
-      const symbol = product.cryptoSymbol as keyof typeof user.cryptoBalances;
-      if (user.cryptoBalances && symbol in user.cryptoBalances) {
-        const updatedBalances = { ...user.cryptoBalances };
-        updatedBalances[symbol] += product.cryptoAmount;
-        setUser({ ...user, cryptoBalances: updatedBalances });
-      }
-    }
   };
 
   return (
@@ -100,21 +77,31 @@ const App: React.FC = () => {
         </div>
 
         <div className="flex-1 px-4 py-6 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible no-scrollbar">
-          <NavItem icon="fa-shopping-bag" label="Marketplace" active={activeTab === AppTab.MARKETPLACE} onClick={() => setActiveTab(AppTab.MARKETPLACE)} />
-          <NavItem icon="fa-comment-dots" label="Messages" active={activeTab === AppTab.MESSAGES} onClick={() => setActiveTab(AppTab.MESSAGES)} />
-          <NavItem icon="fa-plus-circle" label="Sell Item" active={activeTab === AppTab.SELL} onClick={() => setActiveTab(AppTab.SELL)} />
-          <NavItem icon="fa-chart-line" label="Dashboard" active={activeTab === AppTab.DASHBOARD} onClick={() => setActiveTab(AppTab.DASHBOARD)} />
+          <NavItem icon="fa-shopping-bag" label="Market" active={activeTab === AppTab.MARKETPLACE} onClick={() => setActiveTab(AppTab.MARKETPLACE)} />
+          <NavItem icon="fa-comment-dots" label="Chats" active={activeTab === AppTab.MESSAGES} onClick={() => setActiveTab(AppTab.MESSAGES)} />
+          <NavItem icon="fa-plus-circle" label="Sell" active={activeTab === AppTab.SELL} onClick={() => setActiveTab(AppTab.SELL)} />
+          <NavItem icon="fa-chart-line" label="Vault" active={activeTab === AppTab.DASHBOARD} onClick={() => setActiveTab(AppTab.DASHBOARD)} />
+          
+          <div className="my-4 border-t border-slate-800 lg:block hidden"></div>
+          
+          <NavItem 
+            icon="fa-rocket" 
+            label="Publish" 
+            active={activeTab === AppTab.DEPLOY} 
+            onClick={() => setActiveTab(AppTab.DEPLOY)} 
+            highlight={true}
+          />
         </div>
 
         <div className="p-4 border-t border-slate-800 hidden lg:block">
-          <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-2xl backdrop-blur-sm border border-slate-700/50">
+          <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-2xl border border-slate-700/50">
             <div className="relative">
               <img src={user.avatar} className="w-10 h-10 rounded-full object-cover ring-2 ring-indigo-500" alt="" />
-              {user.isVerified && <div className="absolute -bottom-1 -right-1 bg-indigo-500 text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center ring-2 ring-slate-900"><i className="fa-solid fa-check"></i></div>}
+              <div className="absolute -bottom-1 -right-1 bg-indigo-500 text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center ring-2 ring-slate-900"><i className="fa-solid fa-check"></i></div>
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-bold truncate">{user.name}</p>
-              <p className="text-[9px] text-slate-400 uppercase tracking-widest font-black">Tier {user.verificationTier} Member</p>
+              <p className="text-[9px] text-slate-400 uppercase tracking-widest font-black">Tier {user.verificationTier}</p>
             </div>
           </div>
         </div>
@@ -123,14 +110,15 @@ const App: React.FC = () => {
       <main className="flex-1 bg-slate-50 overflow-y-auto">
         <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 p-4 sticky top-0 z-40 flex justify-between items-center lg:hidden shadow-sm">
             <span className="font-black text-slate-900 uppercase tracking-tighter">Willy Paully Links</span>
-            <button className="p-2 text-slate-500"><i className="fa-solid fa-bars"></i></button>
+            <button className="p-2 text-slate-500" onClick={() => setActiveTab(AppTab.DEPLOY)}><i className="fa-solid fa-rocket"></i></button>
         </header>
 
         <div className="max-w-7xl mx-auto p-4 md:p-8">
           {activeTab === AppTab.MARKETPLACE && <Marketplace products={products} onPurchase={handlePurchase} />}
           {activeTab === AppTab.MESSAGES && <Messages chats={chats} products={products} />}
-          {activeTab === AppTab.SELL && <SellForm onAddProduct={addProduct} />}
+          {activeTab === AppTab.SELL && <SellForm onAddProduct={(p) => { setProducts([p, ...products]); setActiveTab(AppTab.MARKETPLACE); }} />}
           {activeTab === AppTab.DASHBOARD && <Dashboard products={products} transactions={transactions} user={user} onUpdateUser={setUser} />}
+          {activeTab === AppTab.DEPLOY && <DeployGuide />}
         </div>
       </main>
 
@@ -139,11 +127,13 @@ const App: React.FC = () => {
   );
 };
 
-const NavItem: React.FC<{ icon: string; label: string; active: boolean; onClick: () => void }> = ({ icon, label, active, onClick }) => (
+const NavItem: React.FC<{ icon: string; label: string; active: boolean; onClick: () => void; highlight?: boolean }> = ({ icon, label, active, onClick, highlight }) => (
   <button
     onClick={onClick}
     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 whitespace-nowrap lg:w-full group ${
-      active ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 scale-[1.02]' : 'hover:bg-slate-800 text-slate-400 hover:text-white'
+      active 
+        ? (highlight ? 'bg-amber-500 text-black shadow-lg' : 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 scale-[1.02]')
+        : (highlight ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'hover:bg-slate-800 text-slate-400 hover:text-white')
     }`}
   >
     <i className={`fa-solid ${icon} text-lg w-6 transition-transform group-hover:scale-110`}></i>

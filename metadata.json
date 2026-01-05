@@ -1,6 +1,24 @@
 {
+  "short_name": "WillyLinks",
   "name": "WILLY PAULLY LINKS",
-  "description": "A sophisticated AI-powered marketplace platform featuring real-time negotiation chats, intelligent product listing generation, and an automated sales consultant.",
+  "description": "Verified P2P Marketplace and Crypto Escrow Platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#05070a",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "https://i.imgur.com/8Nf9ZcO.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.imgur.com/8Nf9ZcO.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
   "requestFramePermissions": [
     "camera"
   ]

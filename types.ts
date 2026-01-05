@@ -32,7 +32,6 @@ export interface Product {
   rating: number;
   sellerAvatar?: string;
   isSellerVerified?: boolean;
-  // Crypto P2P specific fields
   isCryptoListing?: boolean;
   cryptoAmount?: number;
   cryptoSymbol?: string;
@@ -77,5 +76,6 @@ export enum AppTab {
   MARKETPLACE = 'MARKETPLACE',
   MESSAGES = 'MESSAGES',
   SELL = 'SELL',
-  DASHBOARD = 'DASHBOARD'
+  DASHBOARD = 'DASHBOARD',
+  DEPLOY = 'DEPLOY'
 }
