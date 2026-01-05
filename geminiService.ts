@@ -1,8 +1,10 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 
-// Initialize GoogleGenAI once with the API key from process.env.API_KEY
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+/**
+ * Helper to get a fresh AI instance with the current API key.
+ */
+const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 /**
  * Generates a professional product description using the gemini-3-flash-preview model.
@@ -15,6 +17,7 @@ export const generateProductDescription = async (name: string, category: string,
     Keep it under 150 words. Focus on benefits and value proposition. If it's crypto, emphasize P2P security.`;
 
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
@@ -37,6 +40,7 @@ export const getNegotiationAdvice = async (chatHistory: string, productPrice: nu
     Suggest the next best move for the seller to close the deal or handle objections. For crypto, mention escrow safety. Keep it concise.`;
 
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
@@ -53,6 +57,7 @@ export const getNegotiationAdvice = async (chatHistory: string, productPrice: nu
  */
 export const chatWithAssistant = async (message: string, context: string) => {
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: `Context: ${context}\nUser: ${message}`,

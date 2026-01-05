@@ -1,19 +1,53 @@
 
 import React, { useState, useEffect } from 'react';
 
+/**
+ * Define the AIStudio interface to match the expected global type name 'AIStudio'.
+ * This allows for proper interface merging with existing global definitions and avoids type mismatch errors.
+ */
+interface AIStudio {
+  hasSelectedApiKey: () => Promise<boolean>;
+  openSelectKey: () => Promise<void>;
+}
+
+declare global {
+  interface Window {
+    /**
+     * Extend Window with the aistudio property using the named interface.
+     * This resolves the error where the compiler expects the type 'AIStudio' instead of a literal object type.
+     */
+    aistudio: AIStudio;
+  }
+}
+
 const DeployGuide: React.FC = () => {
   const [apiKeyStatus, setApiKeyStatus] = useState<'checking' | 'active' | 'missing'>('checking');
 
-  useEffect(() => {
-    // Simulate check for the environment variable
-    setTimeout(() => {
-      if (process.env.API_KEY && process.env.API_KEY !== 'undefined') {
-        setApiKeyStatus('active');
+  const checkStatus = async () => {
+    try {
+      // Safely access window.aistudio after checking for its existence to handle cases where it might not be initialized.
+      if (window.aistudio) {
+        const hasKey = await window.aistudio.hasSelectedApiKey();
+        setApiKeyStatus(hasKey ? 'active' : 'missing');
       } else {
         setApiKeyStatus('missing');
       }
-    }, 1500);
+    } catch (e) {
+      setApiKeyStatus('missing');
+    }
+  };
+
+  useEffect(() => {
+    checkStatus();
   }, []);
+
+  const handleLinkKey = async () => {
+    if (window.aistudio) {
+      await window.aistudio.openSelectKey();
+      // Per instructions, proceed assuming success after triggering the dialog to mitigate race conditions.
+      setApiKeyStatus('active');
+    }
+  };
 
   return (
     <div className="space-y-8 animate-fadeIn max-w-4xl mx-auto">
@@ -25,18 +59,37 @@ const DeployGuide: React.FC = () => {
           </div>
           <div className="flex-1 text-center md:text-left">
             <h2 className="text-4xl font-black tracking-tight leading-none uppercase">Go Live Protocol</h2>
-            <p className="text-indigo-300 mt-3 text-lg font-medium">Connect your billing account and publish to your users.</p>
+            <p className="text-indigo-300 mt-3 text-lg font-medium">Connect your billing account to activate AI features.</p>
           </div>
           <div className="bg-white/5 border border-white/10 px-6 py-3 rounded-2xl backdrop-blur-md">
             <div className="flex items-center gap-3">
               <div className={`w-3 h-3 rounded-full ${apiKeyStatus === 'active' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></div>
               <span className="text-[10px] font-black uppercase tracking-widest">
-                {apiKeyStatus === 'checking' ? 'Checking Config...' : apiKeyStatus === 'active' ? 'Billing API Linked' : 'Billing Key Missing'}
+                {apiKeyStatus === 'checking' ? 'Checking Config...' : apiKeyStatus === 'active' ? 'Billing Linked' : 'No Key Linked'}
               </span>
             </div>
           </div>
         </div>
       </div>
+
+      {apiKeyStatus === 'missing' && (
+        <div className="bg-amber-50 border border-amber-200 p-8 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-6 animate-slideUp">
+          <div className="flex items-start gap-4">
+             <div className="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center text-xl shrink-0"><i className="fa-solid fa-triangle-exclamation"></i></div>
+             <div>
+               <h4 className="font-black text-amber-900 uppercase tracking-tight">Billing Connection Required</h4>
+               <p className="text-sm text-amber-800/80 font-medium">To use the marketplace AI features, you must link an API key from your paid Google Cloud project.</p>
+               <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" className="text-[10px] font-black uppercase tracking-widest text-amber-700 underline mt-2 inline-block">Learn about billing</a>
+             </div>
+          </div>
+          <button 
+            onClick={handleLinkKey}
+            className="px-8 py-4 bg-amber-600 text-white font-black rounded-2xl uppercase tracking-widest text-xs shadow-lg shadow-amber-200 hover:bg-amber-700 transition-all whitespace-nowrap"
+          >
+            Connect Billing Now
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <StepCard 

@@ -4,6 +4,7 @@ export interface User {
   name: string;
   email: string;
   avatar: string;
+  role: 'admin' | 'customer';
   isVerified: boolean;
   joinedDate: Date;
   phoneNumber?: string;

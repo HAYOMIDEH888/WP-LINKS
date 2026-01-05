@@ -57,7 +57,8 @@ const Auth: React.FC<AuthProps> = ({ onComplete }) => {
     phone: '',
     country: 'NG',
     idType: '',
-    idNumber: ''
+    idNumber: '',
+    role: 'customer' as 'admin' | 'customer'
   });
   const [avatar, setAvatar] = useState('https://i.pravatar.cc/150?u=newuser');
   const [cameraActive, setCameraActive] = useState(false);
@@ -113,11 +114,15 @@ const Auth: React.FC<AuthProps> = ({ onComplete }) => {
   };
 
   const finish = () => {
+    // Determine admin status automatically for developer ease
+    const isAdmin = details.email.toLowerCase().includes('admin') || details.role === 'admin';
+
     onComplete({
       id: Math.random().toString(36).substr(2, 9),
       name: details.name,
       email: details.email,
       avatar: avatar,
+      role: isAdmin ? 'admin' : 'customer',
       isVerified: true,
       joinedDate: new Date(),
       phoneNumber: details.phone,
@@ -147,12 +152,43 @@ const Auth: React.FC<AuthProps> = ({ onComplete }) => {
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-lg bg-[#0d1117] border border-white/5 rounded-[3rem] p-10 lg:p-14 shadow-2xl">
           <div className="flex gap-2 mb-8">
-            {[1, 2, 3, 4].map(s => <div key={s} className={`h-1 flex-1 rounded-full ${step >= s ? 'bg-indigo-500' : 'bg-slate-800'}`} />)}
+            {[1, 2, 3, 4, 5].map(s => <div key={s} className={`h-1 flex-1 rounded-full ${step >= s ? 'bg-indigo-500' : 'bg-slate-800'}`} />)}
           </div>
 
           {step === 1 && (
             <div className="space-y-6 animate-fadeIn">
-              <h3 className="text-2xl font-black text-white">Basic Info</h3>
+              <h3 className="text-2xl font-black text-white">Account Type</h3>
+              <div className="grid grid-cols-1 gap-4">
+                <button 
+                  onClick={() => { setDetails({...details, role: 'customer'}); setStep(2); }}
+                  className="p-6 bg-black border border-slate-800 rounded-2xl text-left group hover:border-indigo-500 transition-all"
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="text-white font-black uppercase tracking-widest text-sm">Customer / Trader</span>
+                    <i className="fa-solid fa-user text-slate-700 group-hover:text-indigo-500 transition-colors"></i>
+                  </div>
+                  <p className="text-slate-500 text-xs mt-2">Access the marketplace, chat with sellers, and trade assets.</p>
+                </button>
+                <button 
+                  onClick={() => { setDetails({...details, role: 'admin'}); setStep(2); }}
+                  className="p-6 bg-black border border-slate-800 rounded-2xl text-left group hover:border-indigo-500 transition-all"
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="text-white font-black uppercase tracking-widest text-sm">Platform Owner</span>
+                    <i className="fa-solid fa-crown text-slate-700 group-hover:text-indigo-500 transition-colors"></i>
+                  </div>
+                  <p className="text-slate-500 text-xs mt-2">Manage the platform, access deployment tools, and billing config.</p>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="flex justify-between items-center">
+                <h3 className="text-2xl font-black text-white">Basic Info</h3>
+                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500">{details.role}</span>
+              </div>
               <div className="space-y-4">
                 <select className="w-full px-6 py-4 bg-black border border-slate-800 rounded-2xl text-white outline-none focus:ring-2 focus:ring-indigo-500" value={details.country} onChange={e => setDetails({...details, country: e.target.value})}>
                   {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.name}</option>)}
@@ -161,11 +197,14 @@ const Auth: React.FC<AuthProps> = ({ onComplete }) => {
                 <input type="email" placeholder="Email Address" className="w-full px-6 py-4 bg-black border border-slate-800 rounded-2xl text-white outline-none focus:ring-2 focus:ring-indigo-500" value={details.email} onChange={e => setDetails({...details, email: e.target.value})} />
                 <input type="tel" placeholder="Phone Number" className="w-full px-6 py-4 bg-black border border-slate-800 rounded-2xl text-white outline-none focus:ring-2 focus:ring-indigo-500" value={details.phone} onChange={e => setDetails({...details, phone: e.target.value})} />
               </div>
-              <button onClick={() => setStep(2)} className="w-full py-5 bg-indigo-600 text-white font-black rounded-2xl uppercase tracking-widest text-sm">Next</button>
+              <div className="flex gap-4">
+                <button onClick={() => setStep(1)} className="flex-1 py-4 bg-slate-800 text-white font-bold rounded-2xl">Back</button>
+                <button onClick={() => setStep(3)} className="flex-1 py-4 bg-indigo-600 text-white font-bold rounded-2xl">Next</button>
+              </div>
             </div>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <div className="space-y-6 animate-fadeIn text-center">
               <h3 className="text-2xl font-black text-white">Profile Photo</h3>
               <div className="relative w-40 h-40 mx-auto group">
@@ -186,13 +225,13 @@ const Auth: React.FC<AuthProps> = ({ onComplete }) => {
               </div>
               <canvas ref={canvasRef} className="hidden" />
               <div className="flex gap-4">
-                <button onClick={() => setStep(1)} className="flex-1 py-4 bg-slate-800 text-white font-bold rounded-2xl">Back</button>
-                <button onClick={() => setStep(3)} className="flex-1 py-4 bg-indigo-600 text-white font-bold rounded-2xl">Next</button>
+                <button onClick={() => setStep(2)} className="flex-1 py-4 bg-slate-800 text-white font-bold rounded-2xl">Back</button>
+                <button onClick={() => setStep(4)} className="flex-1 py-4 bg-indigo-600 text-white font-bold rounded-2xl">Next</button>
               </div>
             </div>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <div className="space-y-6 animate-fadeIn">
               <h3 className="text-2xl font-black text-white">ID Verification</h3>
               <p className="text-slate-500 text-sm">Provide your {selectedCountry.name} identification number.</p>
@@ -204,17 +243,17 @@ const Auth: React.FC<AuthProps> = ({ onComplete }) => {
                 <input type="text" placeholder="Identification Number" className="w-full px-6 py-4 bg-black border border-slate-800 rounded-2xl text-white outline-none focus:ring-2 focus:ring-indigo-500" value={details.idNumber} onChange={e => setDetails({...details, idNumber: e.target.value})} />
               </div>
               <div className="flex gap-4">
-                <button onClick={() => setStep(2)} className="flex-1 py-4 bg-slate-800 text-white font-bold rounded-2xl">Back</button>
-                <button onClick={() => details.idType && details.idNumber && setStep(4)} className="flex-1 py-4 bg-indigo-600 text-white font-bold rounded-2xl">Verify</button>
+                <button onClick={() => setStep(3)} className="flex-1 py-4 bg-slate-800 text-white font-bold rounded-2xl">Back</button>
+                <button onClick={() => details.idType && details.idNumber && setStep(5)} className="flex-1 py-4 bg-indigo-600 text-white font-bold rounded-2xl">Verify</button>
               </div>
             </div>
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <div className="text-center space-y-8 py-10 animate-fadeIn">
               <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto text-white text-4xl shadow-xl"><i className="fa-solid fa-check"></i></div>
-              <h3 className="text-3xl font-black text-white">Tier 1 Active</h3>
-              <p className="text-slate-400">Your account is created with a $500 limit. You can upgrade to higher tiers from your dashboard.</p>
+              <h3 className="text-3xl font-black text-white">{details.role === 'admin' ? 'Owner Vault Active' : 'Tier 1 Active'}</h3>
+              <p className="text-slate-400">Your account is created. {details.role === 'admin' ? 'You have administrative access to deployment tools.' : 'You can start trading immediately with a $500 limit.'}</p>
               <button onClick={finish} className="w-full py-5 bg-indigo-600 text-white font-black rounded-2xl uppercase tracking-widest text-sm shadow-xl shadow-indigo-500/20">Enter Marketplace</button>
             </div>
           )}

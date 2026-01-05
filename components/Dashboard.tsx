@@ -19,8 +19,7 @@ const Dashboard: React.FC<DashboardProps> = ({ products, transactions, user, onU
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const myItems = products.filter(p => p.seller === user.name || p.seller === 'John Doe');
-  const totalRevenue = transactions.reduce((acc, curr) => acc + curr.amount, 0);
-
+  
   const startVerification = (tier: 2 | 3) => {
     setVerifStep(tier === 2 ? 'doc' : 'live');
     startCamera();
@@ -65,6 +64,12 @@ const Dashboard: React.FC<DashboardProps> = ({ products, transactions, user, onU
     }, 100);
   };
 
+  const handleLinkBilling = async () => {
+    if (window.aistudio) {
+      await window.aistudio.openSelectKey();
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fadeIn">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -72,7 +77,7 @@ const Dashboard: React.FC<DashboardProps> = ({ products, transactions, user, onU
           <h2 className="text-4xl font-black text-slate-900 tracking-tight">Dashboard</h2>
           <p className="text-slate-500 mt-1 font-medium">Verified Level: <span className="text-indigo-600 font-bold">Tier {user.verificationTier}</span></p>
         </div>
-        <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] overflow-x-auto no-scrollbar">
+        <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] overflow-x-auto no-scrollbar items-center">
           {['sales', 'billing', 'wallet', 'verification'].map((tab) => (
             <button 
               key={tab}
@@ -82,6 +87,14 @@ const Dashboard: React.FC<DashboardProps> = ({ products, transactions, user, onU
               {tab}
             </button>
           ))}
+          {user.role === 'admin' && (
+            <button 
+              onClick={handleLinkBilling}
+              className="ml-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-100 hover:bg-slate-900 transition-all whitespace-nowrap"
+            >
+              <i className="fa-solid fa-link mr-2"></i> Link Billing
+            </button>
+          )}
         </div>
       </div>
 

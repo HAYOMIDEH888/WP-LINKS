@@ -82,15 +82,18 @@ const App: React.FC = () => {
           <NavItem icon="fa-plus-circle" label="Sell" active={activeTab === AppTab.SELL} onClick={() => setActiveTab(AppTab.SELL)} />
           <NavItem icon="fa-chart-line" label="Vault" active={activeTab === AppTab.DASHBOARD} onClick={() => setActiveTab(AppTab.DASHBOARD)} />
           
-          <div className="my-4 border-t border-slate-800 lg:block hidden"></div>
-          
-          <NavItem 
-            icon="fa-rocket" 
-            label="Publish" 
-            active={activeTab === AppTab.DEPLOY} 
-            onClick={() => setActiveTab(AppTab.DEPLOY)} 
-            highlight={true}
-          />
+          {user.role === 'admin' && (
+            <>
+              <div className="my-4 border-t border-slate-800 lg:block hidden"></div>
+              <NavItem 
+                icon="fa-rocket" 
+                label="Publish" 
+                active={activeTab === AppTab.DEPLOY} 
+                onClick={() => setActiveTab(AppTab.DEPLOY)} 
+                highlight={true}
+              />
+            </>
+          )}
         </div>
 
         <div className="p-4 border-t border-slate-800 hidden lg:block">
@@ -101,7 +104,10 @@ const App: React.FC = () => {
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-bold truncate">{user.name}</p>
-              <p className="text-[9px] text-slate-400 uppercase tracking-widest font-black">Tier {user.verificationTier}</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <p className="text-[9px] text-slate-400 uppercase tracking-widest font-black">Tier {user.verificationTier}</p>
+                {user.role === 'admin' && <span className="text-[7px] bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 rounded-md font-black uppercase">Owner</span>}
+              </div>
             </div>
           </div>
         </div>
@@ -110,7 +116,9 @@ const App: React.FC = () => {
       <main className="flex-1 bg-slate-50 overflow-y-auto">
         <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 p-4 sticky top-0 z-40 flex justify-between items-center lg:hidden shadow-sm">
             <span className="font-black text-slate-900 uppercase tracking-tighter">Willy Paully Links</span>
-            <button className="p-2 text-slate-500" onClick={() => setActiveTab(AppTab.DEPLOY)}><i className="fa-solid fa-rocket"></i></button>
+            {user.role === 'admin' && (
+              <button className="p-2 text-indigo-600" onClick={() => setActiveTab(AppTab.DEPLOY)}><i className="fa-solid fa-rocket"></i></button>
+            )}
         </header>
 
         <div className="max-w-7xl mx-auto p-4 md:p-8">
@@ -118,7 +126,7 @@ const App: React.FC = () => {
           {activeTab === AppTab.MESSAGES && <Messages chats={chats} products={products} />}
           {activeTab === AppTab.SELL && <SellForm onAddProduct={(p) => { setProducts([p, ...products]); setActiveTab(AppTab.MARKETPLACE); }} />}
           {activeTab === AppTab.DASHBOARD && <Dashboard products={products} transactions={transactions} user={user} onUpdateUser={setUser} />}
-          {activeTab === AppTab.DEPLOY && <DeployGuide />}
+          {activeTab === AppTab.DEPLOY && user.role === 'admin' && <DeployGuide />}
         </div>
       </main>
 
